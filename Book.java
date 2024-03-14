@@ -5,7 +5,7 @@ public class Book {
     String author;
     String genre;
     boolean availability_status;
-    Book(){
+    Book(){//Constructor for the book
         bookID = 0;
         title = null;
         author = null;

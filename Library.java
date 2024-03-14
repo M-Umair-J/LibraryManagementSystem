@@ -11,18 +11,16 @@ import java.util.Random;
 public class Library {
     Scanner sc = new Scanner(System.in);
     Random random = new Random();
-    static int book = 0;
-    static int user = 0;
-    static int book_added = 0;
+    //Creating array lists to store the data when retrieved from the file
     static ArrayList<Book> bookCollection = new ArrayList<>();
     static ArrayList<User> userCollection = new ArrayList<>();
 
-    void addNewBook() {
-        Book newBook = new Book();
-        while(true){
+    void addNewBook() {//Method to add new book
+        Book newBook = new Book();//Creating the book object to get the book data
+        while(true){// looping along with the try catch to ensure that the invalid inputs are handled properly
             try{
         System.out.println("Please enter the id of the book!");
-        int randomnum = random.nextInt(sc.nextInt());
+        int randomnum = random.nextInt(sc.nextInt());  // generating a random number for the book id against the seed entered by the user
         newBook.bookID = randomnum;
         System.out.println("Please enter the title of the book!");
         newBook.title = sc.next();
@@ -34,62 +32,40 @@ public class Library {
         break;
         }catch(Exception e){
             System.out.println("Invalid Input! Try again");
-            sc.next();
+            sc.next();//clearing buffer
             continue;
         }
     }
-        bookCollection.add(newBook);
-        bookFileWrite("C:\\BookStorage", newBook);
-        book++;
+        bookCollection.add(newBook);//adding the book to the collection of books
+        bookFileWrite("C:\\BookStorage", newBook);//writing the book with the attributes entered by user on to the file
     }
 
-    void addNewUser() {
-        User newUser = new User();
+    void addNewUser() {//Method to add new user
+        User newUser = new User();//Creating new user object to take the inputs from the user and adding them to the user storage
         int randomnum;
-        int borrowidtemp;
-        boolean flag = false;
-        while(true){
+        while(true){//loopint through the inputs along with the try catch to ensure that the inputs are handled properly
             try{
         System.out.println("Please enter the id of the user!");
-        randomnum = random.nextInt(sc.nextInt());
+        randomnum = random.nextInt(sc.nextInt());//generating a random number for the user id against the seed entered by the user
         newUser.userID = randomnum;
         System.out.println("Please enter the name of the user!");
         newUser.name = sc.next();
         System.out.println("Please enter the contact information of the user!");
         newUser.contact_information = sc.next();
-        System.out.println("Please enter the id of the borrowed book!");
-        borrowidtemp = sc.nextInt();
-        fileReadBook();
-        for (Book book : bookCollection) {
-            if(borrowidtemp == book.bookID){
-                newUser.borrowed_booksID = borrowidtemp;
-                flag = true;
-                break;
-            }
-            else{
-                continue;
-            }
-        }
-        if(!flag){
-            System.out.println("\n!!!!Borrowed book Id not found in the book storage! Try again!!!!\n");
-            continue;
-        }
-        else{
+        newUser.borrowed_booksID = 0;
         break;
-        }
         }catch(Exception e){
             System.out.println("Invalid input! Try again");
             sc.next();
             continue;
         }
     }
-        userCollection.add(newUser);
-        userFileWrite("C:\\UserStorage", newUser);
-        user++;
+        userCollection.add(newUser);//adding the user to the user collection (array list)
+        userFileWrite("C:\\UserStorage", newUser);//adding the user to the file storage as well
     }
 
     static void displayBooks(final int a) {
-        boolean flag = false;
+        boolean flag = false;//mehtod to display the book based on the availability staus and the book id enterd by the user and then searching the collection (array lists) to display the book
         for (Book book : bookCollection) {
             if (book.bookID == a) {
                 if (book.availability_status == true) {
@@ -112,18 +88,19 @@ public class Library {
     }
 
 
-    void borrowBook(int uID,int bID){
+    void borrowBook(int uID,int bID){//method to borrow the book from the file by settin the availablility status false and assigning the book id to the borrowed user id
+        //here we have used the RandomAccessFile class to read the file
         try(RandomAccessFile reader = new RandomAccessFile("C:\\BookStorage","r"))
         {
             String line;
-            int i = 1;
+            int i = 0;
             while((line = reader.readLine())!=null){
-                if(i==1 || i%7 == 0){
+                if(i%6==0){// to ensure that the correct lines are being read from the file
                     if(bID == Integer.parseInt(line)){
                         try{
                             RandomAccessFile randomAccessFile = new RandomAccessFile("C:\\BookStorage", "rw");
                             randomAccessFile.seek(0);
-                            for(int j=1;j<=i+3;j++){
+                            for(int j = 0;j<=i+3;j++){
                                 randomAccessFile.readLine();
                             }
                             randomAccessFile.writeBytes("0");
@@ -131,7 +108,7 @@ public class Library {
                             randomAccessFile.close();
                         }
                         catch(Exception e){
-                            System.out.println(e);
+                            System.out.println("There might be a problem while borrowing the book! Check the current books available using main menu!");                            
                         }
                     }
                 }
@@ -143,22 +120,23 @@ public class Library {
         }
         try(RandomAccessFile reader = new RandomAccessFile("C:\\UserStorage","r")){
             String line;
-            int i = 1;
+            int i = 0;
             while((line = reader.readLine())!=null){
-                if(i==1 || i%6 == 0){
+                if(i%5==0){
                     if(uID == Integer.parseInt(line)){
                         try{
                             RandomAccessFile randomAccessFile = new RandomAccessFile("C:\\UserStorage", "rw");
                             randomAccessFile.seek(0);
-                            for(int j = 1;j<=2+i;j++){
+                            for(int j = 0;j<=2+i;j++){
                                 randomAccessFile.readLine();
                             }
                             randomAccessFile.writeBytes(Integer.toString(bID));
                             randomAccessFile.seek(0);
                             randomAccessFile.close();
+
                         }
                         catch(Exception e){
-                            System.out.println(e);
+                            System.out.println("There might be a problem while borrowing the book! Check the current books available using main menu!");
                         }
                     }
                 }
@@ -168,24 +146,24 @@ public class Library {
         catch(Exception e){
             System.out.println(e);
         }
-
-        }
+    }
         
-    void bookReturn(int uId,int bId){
+    void bookReturn(int uId,int bId){//method to return the book by setting the user borrowed id back to 0 and by setting the availablity status of the book to true
         try{
            RandomAccessFile randomAccessFile = new RandomAccessFile("C:\\UserStorage","rw");
             String line;
-            int i=1;
+            int i=0;
             while ((line = randomAccessFile.readLine())!=null) {
-                if(i==1 || i%6==0){
+                if(i%5==0){//again using an iterator read and write to the correct line
                     if(uId == Integer.parseInt(line)){
                         randomAccessFile.seek(0);
-                        for(int j=1;j<=2+i;j++){
+                        for(int j=0;j<=2+i;j++){
                             randomAccessFile.readLine();
                         }
-                        // int length;
-                        // randomAccessFile.writeBytes(new String(new char[k]).replace('\0', ' '));
-                        randomAccessFile.writeBytes("0000");
+                        // int length = randomAccessFile.readLine().length();
+                        // System.out.println(length);
+                        // randomAccessFile.writeBytes(new String(new char[length]).replace('\0', ' '));
+                        randomAccessFile.writeBytes("0");
                         randomAccessFile.seek(0);
                         randomAccessFile.close();
                     }
@@ -193,17 +171,17 @@ public class Library {
                 i++;
             }
         }catch(Exception e){
-            System.out.println(e);
+            System.out.println("There might be a problem while returing the book! Check the current books available using main menu!");
         }
         try{
             RandomAccessFile randomAccessFile = new RandomAccessFile("C:\\BookStorage","rw");
             String line;
-            int i=1;
+            int i=0;
             while((line = randomAccessFile.readLine())!=null){
-                if(i==1 || i%7==0){
+                if(i%6==0){
                     if(bId == Integer.parseInt(line)){
                         randomAccessFile.seek(0);
-                        for(int j = 1; j <= i+3; j++){
+                        for(int j = 0; j <= i+3; j++){
                             randomAccessFile.readLine();
                         }
                         randomAccessFile.writeBytes("1");
@@ -214,7 +192,7 @@ public class Library {
                 i++;
             }
         }catch(Exception e){
-            System.out.println(e);
+            System.out.println("There might be a problem while returing the book! Check the current books available using main menu!");
         }
     }
 
@@ -222,6 +200,9 @@ public class Library {
         
         System.out.println("Please enter the User Id!");
         int a = sc.nextInt();
+        //getting user id and then searching the user collection array list to display the book borrowed by the user
+        userCollection.clear();
+        fileReadUser();
         for (User user : userCollection) {
             if (user.userID == a) {
                 if (user.borrowed_booksID != 0) {
@@ -247,7 +228,7 @@ public class Library {
     }
 
     static void fileCreation(String filename) {
-        try {
+        try {//file creationg method to create a new file
             File file = new File(filename);
             if (file.createNewFile()) {
                 System.out.println("New file created!");
@@ -260,7 +241,7 @@ public class Library {
         }
     }
 
-    static void fileReadBook() {
+    static void fileReadBook() {//method to read the file using the RandomAccessFile
         String a = null, y = null;
         String b = null, c = null, d = null;
         boolean x = false;
@@ -408,15 +389,7 @@ static void userFileWrite(String filename, User object) {
         } catch (Exception e) {
             System.out.println(e);
         }
-    }
-    static void displayAllUsers(){
-        for (User users : userCollection) {
-            System.out.println("User Id is "+users.userID);
-            System.out.println("User name is "+users.name);
-            System.out.println("User contact info is "+users.contact_information);
-            System.out.println("User has borrowed the book with the id "+users.borrowed_booksID);
-        }
-    }
+}
     static void displayOnlyIdsOfBooks(){
         bookCollection.clear();
         Library.fileReadBook();
